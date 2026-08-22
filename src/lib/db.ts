@@ -22,7 +22,9 @@ const fallbacks: Record<string, string> = {
 };
 
 export function imageFor(row: { image_url: string | null; category: string }) {
-  return row.image_url || fallbacks[row.category] || hero;
+  // Only trust absolute/remote image URLs; seeded local paths fall back to bundled art.
+  const remote = row.image_url && /^https?:\/\//.test(row.image_url) ? row.image_url : null;
+  return remote || fallbacks[row.category] || hero;
 }
 
 export const projectsQuery = queryOptions({
