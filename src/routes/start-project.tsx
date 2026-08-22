@@ -7,9 +7,10 @@ import { inquirySchema } from "@/lib/inquiry-schema";
 import { submitInquiry } from "@/lib/inquiries.functions";
 
 export const Route = createFileRoute("/start-project")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    service: typeof search.service === "string" ? search.service : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { service?: string } => {
+    const value = search["service"];
+    return typeof value === "string" ? { service: value } : {};
+  },
   head: () => ({
     meta: [
       { title: "Start a Project — Creative Tech Global Enterprise" },
@@ -85,14 +86,14 @@ function StartProjectPage() {
                 Name
               </label>
               <input id="name" name="name" className={field} autoComplete="name" />
-              {errors.name && <p className="mt-2 text-xs text-primary">{errors.name}</p>}
+              {errors["name"] && <p className="mt-2 text-xs text-primary">{errors["name"]}</p>}
             </div>
             <div>
               <label className="label-mono text-muted-foreground" htmlFor="email">
                 Email
               </label>
               <input id="email" name="email" type="email" className={field} autoComplete="email" />
-              {errors.email && <p className="mt-2 text-xs text-primary">{errors.email}</p>}
+              {errors["email"] && <p className="mt-2 text-xs text-primary">{errors["email"]}</p>}
             </div>
             <div>
               <label className="label-mono text-muted-foreground" htmlFor="phone">
@@ -120,7 +121,7 @@ function StartProjectPage() {
                 </option>
               ))}
             </select>
-            {errors.service && <p className="mt-2 text-xs text-primary">{errors.service}</p>}
+            {errors["service"] && <p className="mt-2 text-xs text-primary">{errors["service"]}</p>}
           </div>
 
           <div>
@@ -128,8 +129,8 @@ function StartProjectPage() {
               Project description
             </label>
             <textarea id="description" name="description" rows={6} className={field} />
-            {errors.description && (
-              <p className="mt-2 text-xs text-primary">{errors.description}</p>
+            {errors["description"] && (
+              <p className="mt-2 text-xs text-primary">{errors["description"]}</p>
             )}
           </div>
 
