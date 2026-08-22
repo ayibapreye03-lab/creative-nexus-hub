@@ -22,7 +22,7 @@ export const Route = createFileRoute("/services/")({
   component: ServicesPage,
 });
 
-export default function ServicesPage() {
+function ServicesPage() {
   return (
     <>
       <PageHeader
