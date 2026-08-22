@@ -38,7 +38,7 @@ const beliefs = [
   "Clear process removes most of the risk from creative work.",
 ];
 
-export default function AboutPage() {
+function AboutPage() {
   return (
     <>
       <PageHeader
