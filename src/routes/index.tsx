@@ -92,7 +92,7 @@ function Index() {
               className="group bg-background p-7 transition-colors hover:bg-surface"
             >
               <div className="flex items-start justify-between gap-4">
-                <h3 className="font-display text-xl tracking-tight">{s.title}</h3>
+                <h3 className="font-display text-xl tracking-tight">{s.name}</h3>
                 <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
               </div>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{s.summary}</p>
@@ -118,10 +118,10 @@ function Index() {
           title="A clear route from brief to delivery."
         />
         <ol className="mt-14 grid gap-px bg-black/10 sm:grid-cols-2 lg:grid-cols-3">
-          {processStages.map((p, i) => (
-            <li key={p.title} className="bg-invert p-7">
-              <span className="label-mono text-primary">0{i + 1}</span>
-              <h3 className="mt-4 font-display text-xl tracking-tight">{p.title}</h3>
+          {processStages.map((p) => (
+            <li key={p.name} className="bg-invert p-7">
+              <span className="label-mono text-primary">{p.number}</span>
+              <h3 className="mt-4 font-display text-xl tracking-tight">{p.name}</h3>
               <p className="mt-3 text-sm leading-relaxed text-invert-foreground/70">{p.copy}</p>
             </li>
           ))}
