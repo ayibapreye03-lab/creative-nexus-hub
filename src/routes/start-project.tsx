@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { PageHeader } from "@/components/site/Section";
 import { services, budgetRanges, contactMethods } from "@/lib/content";
 import { inquirySchema } from "@/lib/inquiry-schema";
 import { submitInquiry } from "@/lib/inquiries.functions";
-import { whatsappHref } from "@/config/site";
+import { site, whatsappHref } from "@/config/site";
 
 export const Route = createFileRoute("/start-project")({
   validateSearch: (search: Record<string, unknown>): { service?: string } => {
@@ -33,6 +33,8 @@ export const Route = createFileRoute("/start-project")({
 const field =
   "mt-2 w-full border border-border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-primary";
 
+type Confirmation = { summary: string; wa: string | null };
+
 function StartProjectPage() {
   const { service } = Route.useSearch();
   const send = useServerFn(submitInquiry);
@@ -40,6 +42,26 @@ function StartProjectPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<{ ok: boolean; message: string } | null>(null);
   const [pending, setPending] = useState(false);
+  const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  async function copySummary() {
+    if (!confirmation) return;
+    try {
+      await navigator.clipboard.writeText(confirmation.summary);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      // clipboard unavailable — ignore
+    }
+  }
+
+  function startAnother() {
+    setConfirmation(null);
+    setErrors({});
+    setStatus(null);
+    setCopied(false);
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -89,12 +111,12 @@ function StartProjectPage() {
     try {
       const result = await send({ data: parsed.data });
       if (wa && !waWindow) window.location.href = wa;
-      setStatus(
-        result.ok
-          ? { ok: true, message: "Request sent — finish up in WhatsApp to reach us instantly." }
-          : result,
-      );
-      if (result.ok) formEl.reset();
+      if (result.ok) {
+        setConfirmation({ summary: message, wa });
+        formEl.reset();
+      } else {
+        setStatus(result);
+      }
     } catch {
       if (wa && !waWindow) window.location.href = wa;
       setStatus({ ok: false, message: "Something went wrong. Please try again." });
@@ -103,6 +125,71 @@ function StartProjectPage() {
     }
   }
 
+  if (confirmation) {
+    return (
+      <>
+        <PageHeader
+          label="Confirmation"
+          title="Your brief was sent to WhatsApp."
+          copy="It opened in a new WhatsApp tab — press send there to deliver it to us. A copy of what was sent is saved below in case the tab didn't open."
+        />
+
+        <div className="mx-auto max-w-3xl px-5 py-16 sm:px-8 sm:py-24">
+          <div className="border border-border bg-card">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3">
+              <span className="label-mono text-xs text-muted-foreground">
+                Summary of your request
+              </span>
+              <span className="label-mono text-xs text-primary">
+                Delivered to WhatsApp · +{site.whatsappNumber}
+              </span>
+            </div>
+
+            <pre className="max-h-[60vh] overflow-auto whitespace-pre-wrap break-words px-5 py-4 font-mono text-sm leading-relaxed text-foreground">
+{confirmation.summary}
+            </pre>
+
+            <div className="flex flex-wrap items-center gap-3 border-t border-border px-5 py-4">
+              <button
+                type="button"
+                onClick={copySummary}
+                className="label-mono border border-primary bg-primary px-5 py-3 text-primary-foreground transition-colors hover:bg-transparent hover:text-primary"
+              >
+                {copied ? "Copied ✓" : "Copy summary"}
+              </button>
+              {confirmation.wa && (
+                <a
+                  href={confirmation.wa}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="label-mono border border-border bg-background px-5 py-3 text-foreground transition-colors hover:border-primary hover:text-primary"
+                >
+                  Re-open in WhatsApp
+                </a>
+              )}
+              <button
+                type="button"
+                onClick={startAnother}
+                className="label-mono border border-border bg-background px-5 py-3 text-foreground transition-colors hover:border-primary hover:text-primary"
+              >
+                Start another project
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+            <span>What happens next?</span>
+            <Link to="/" className="underline underline-offset-4 hover:text-primary">
+              Back to home
+            </Link>
+            <Link to="/portfolio" className="underline underline-offset-4 hover:text-primary">
+              Browse our work
+            </Link>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -225,7 +312,6 @@ function StartProjectPage() {
           <p className="text-xs text-muted-foreground">
             Submitting opens WhatsApp with your brief already written out — just press send.
           </p>
-
         </form>
       </div>
     </>
