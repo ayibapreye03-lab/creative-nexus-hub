@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/site/Section";
 import { services, budgetRanges, contactMethods } from "@/lib/content";
 import { inquirySchema } from "@/lib/inquiry-schema";
 import { submitInquiry } from "@/lib/inquiries.functions";
+import { whatsappHref } from "@/config/site";
 
 export const Route = createFileRoute("/start-project")({
   validateSearch: (search: Record<string, unknown>): { service?: string } => {
@@ -42,7 +43,8 @@ function StartProjectPage() {
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const form = new FormData(e.currentTarget);
+    const formEl = e.currentTarget;
+    const form = new FormData(formEl);
     const values = Object.fromEntries(form.entries());
     const parsed = inquirySchema.safeParse(values);
 
@@ -59,16 +61,48 @@ function StartProjectPage() {
 
     setErrors({});
     setPending(true);
+
+    const d = parsed.data;
+    const serviceName = services.find((s) => s.slug === d.service)?.name ?? d.service;
+    const message = [
+      "New project request — Creative Tech Global Enterprise",
+      "",
+      `Name: ${d.name}`,
+      `Email: ${d.email}`,
+      d.phone ? `Phone: ${d.phone}` : null,
+      d.company ? `Company: ${d.company}` : null,
+      `Service: ${serviceName}`,
+      d.budget ? `Budget: ${d.budget}` : null,
+      d.deadline ? `Timeline: ${d.deadline}` : null,
+      `Preferred contact: ${d.contact_method}`,
+      "",
+      "Project description:",
+      d.description,
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    const wa = whatsappHref(message);
+    // Open the WhatsApp tab synchronously so mobile browsers don't block it.
+    const waWindow = wa ? window.open(wa, "_blank", "noopener,noreferrer") : null;
+
     try {
       const result = await send({ data: parsed.data });
-      setStatus(result);
-      if (result.ok) e.currentTarget.reset();
+      if (wa && !waWindow) window.location.href = wa;
+      setStatus(
+        result.ok
+          ? { ok: true, message: "Request sent — finish up in WhatsApp to reach us instantly." }
+          : result,
+      );
+      if (result.ok) formEl.reset();
     } catch {
+      if (wa && !waWindow) window.location.href = wa;
       setStatus({ ok: false, message: "Something went wrong. Please try again." });
     } finally {
       setPending(false);
     }
   }
+
 
   return (
     <>
@@ -180,7 +214,7 @@ function StartProjectPage() {
               disabled={pending}
               className="label-mono border border-primary bg-primary px-6 py-3.5 text-primary-foreground transition-colors hover:bg-transparent hover:text-primary disabled:opacity-60"
             >
-              {pending ? "Sending…" : "Send request"}
+              {pending ? "Sending…" : "Send via WhatsApp"}
             </button>
             {status && (
               <p className={status.ok ? "text-sm text-primary" : "text-sm text-muted-foreground"}>
@@ -188,6 +222,10 @@ function StartProjectPage() {
               </p>
             )}
           </div>
+          <p className="text-xs text-muted-foreground">
+            Submitting opens WhatsApp with your brief already written out — just press send.
+          </p>
+
         </form>
       </div>
     </>
