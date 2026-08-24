@@ -214,7 +214,7 @@ function StartProjectPage() {
               disabled={pending}
               className="label-mono border border-primary bg-primary px-6 py-3.5 text-primary-foreground transition-colors hover:bg-transparent hover:text-primary disabled:opacity-60"
             >
-              {pending ? "Sending…" : "Send request"}
+              {pending ? "Sending…" : "Send via WhatsApp"}
             </button>
             {status && (
               <p className={status.ok ? "text-sm text-primary" : "text-sm text-muted-foreground"}>
@@ -222,6 +222,10 @@ function StartProjectPage() {
               </p>
             )}
           </div>
+          <p className="text-xs text-muted-foreground">
+            Submitting opens WhatsApp with your brief already written out — just press send.
+          </p>
+
         </form>
       </div>
     </>
