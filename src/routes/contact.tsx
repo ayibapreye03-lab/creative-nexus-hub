@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Mail, Phone, MapPin, ArrowRight } from "lucide-react";
 import { PageHeader } from "@/components/site/Section";
-import { site, mailHref, telHref, whatsappHref } from "@/config/site";
+import { site, mailHref, preferredWhatsappHref, telHref, whatsappHref } from "@/config/site";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -64,6 +64,13 @@ function ContactPage() {
               href={wa}
               target="_blank"
               rel="noreferrer noopener"
+              onClick={(event) => {
+                const preferredHref = preferredWhatsappHref();
+                if (preferredHref && preferredHref !== wa) {
+                  event.preventDefault();
+                  window.location.href = preferredHref;
+                }
+              }}
               className="label-mono inline-flex items-center gap-2 border border-border px-5 py-3 transition-colors hover:border-foreground"
             >
               Chat on WhatsApp
