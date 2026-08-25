@@ -40,5 +40,17 @@ export function whatsappHref(message: string = site.whatsappMessage) {
   return `https://wa.me/${site.whatsappNumber}?text=${encodeURIComponent(message)}`;
 }
 
+export function whatsappAppHref(message: string = site.whatsappMessage) {
+  if (!site.whatsappNumber) return null;
+  return `whatsapp://send?phone=${site.whatsappNumber}&text=${encodeURIComponent(message)}`;
+}
+
+export function preferredWhatsappHref(message: string = site.whatsappMessage) {
+  const webHref = whatsappHref(message);
+  if (typeof navigator === "undefined") return webHref;
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  return isMobile ? whatsappAppHref(message) : webHref;
+}
+
 export const telHref = `tel:+${site.phone.replace(/^0/, "234")}`;
 export const mailHref = `mailto:${site.email}`;

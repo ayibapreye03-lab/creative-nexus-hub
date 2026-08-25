@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/site/Section";
 import { services, budgetRanges, contactMethods } from "@/lib/content";
 import { inquirySchema } from "@/lib/inquiry-schema";
 import { submitInquiry } from "@/lib/inquiries.functions";
-import { site, whatsappHref } from "@/config/site";
+import { preferredWhatsappHref, site } from "@/config/site";
 
 export const Route = createFileRoute("/start-project")({
   validateSearch: (search: Record<string, unknown>): { service?: string } => {
@@ -104,7 +104,7 @@ function StartProjectPage() {
       .filter(Boolean)
       .join("\n");
 
-    const wa = whatsappHref(message);
+    const wa = preferredWhatsappHref(message);
     // Open the WhatsApp tab synchronously so mobile browsers don't block it.
     const waWindow = wa ? window.open(wa, "_blank", "noopener,noreferrer") : null;
 
